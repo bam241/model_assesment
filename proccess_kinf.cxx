@@ -2,6 +2,7 @@
 #include "CLASSLogger.hxx"
 #include "Equivalence/EQM_MLP_Kinf.hxx"
 #include "EvolutionData.hxx"
+#include "IsotopicVector.hxx"
 
 #include <TMVA/Reader.h>
 
@@ -25,6 +26,9 @@ string replace_extension(string filename, string new_extension) {
 
 vector<pair<vector<int>, string> > read_nfo(string name) {
   ifstream mynfo(name);
+  if(!mynfo)
+    std::cout << "not able to open " << name << std::endl;
+  
   vector<pair<vector<int>, string> > v_name;
   do {
     int Z, A, I;
@@ -35,17 +39,25 @@ vector<pair<vector<int>, string> > read_nfo(string name) {
     zai.push_back(A);
     zai.push_back(I);
     v_name.push_back(pair<vector<int>, string>(zai, name));
-  } while (mynfo.eof());
+    std::cout << Z << " " << A << " " << I << " " << name << std::endl;
+  } while (!mynfo.eof());
+  v_name.pop_back(); //remove additional line
   return v_name;
 }
 
 void book_tmva_model(string weight_file) {
+  std::cout << "in tmva" << std::endl;
+  
   string info_file = replace_extension(weight_file, "nfo");
   input_name = read_nfo(info_file);
+  std::cout << "nfo readed" << std::endl;
 
   reader = new TMVA::Reader("Silent");
   for (int i = 0; i < (int)input_name.size(); i++) {
     input_var.push_back(0);
+  }
+  
+  for (int i = 0; i < (int)input_name.size(); i++) {
     reader->AddVariable(input_name[i].second, &input_var[i]);
   }
   reader->AddVariable("Time", &input_time);
@@ -56,10 +68,12 @@ void book_tmva_model(string weight_file) {
 void update_tmva_input(IsotopicVector iv, double t) {
   for (int i = 0; i < (int)input_name.size(); i++) {
     input_var[i] = iv.GetQuantity(
-        input_name[i].first[0], input_name[i].first[1], input_name[i].first[2]);
+        input_name[i].first[0], input_name[i].first[1], input_name[i].first[2]) / iv.GetActinidesComposition().GetSumOfAll();
+  //  std::cout << input_name[i].first[0] <<" "<< input_name[i].first[1] <<" "<<  input_name[i].first[2] << " " << input_var[i] << std::endl;
   }
 
   input_time = t;
+  std::cout << " " << input_time << std::endl;
 }
 
 double run_tmva(IsotopicVector iv, double t) {
@@ -77,20 +91,27 @@ int main(int argc, char** argv) {
   }
 
   CLASSLogger* mylog = new CLASSLogger("mylog.log");
-
   ifstream my_data_idx(argv[1]);
   vector<EvolutionData> my_data;
   string line;
   getline(my_data_idx, line);
+  int n = 0;
+
   do {
     my_data.push_back(EvolutionData(mylog, line));
     getline(my_data_idx, line);
+    n++;
+    if( (n+1) %10 ==0)
+      std::cout << n <<"/1000 completed!\r" << std::flush;
   } while (!my_data_idx.eof());
 
-  book_tmva_model(argv[1]);
-
+  std::cout << "before " << std::endl;
+  book_tmva_model(argv[2]);
+  std::cout << "booked " << std::endl;
+  
   for (int i = 0; i <= (int)my_data.size(); i++) {
     IsotopicVector compo = my_data[i].GetIsotopicVectorAt(0.);
+    //compo.Print();
     TGraph* keff = my_data[i].GetKeff();
     int n_point = keff->GetN();
     vector<double> time;
@@ -104,7 +125,7 @@ int main(int argc, char** argv) {
       keff->GetPoint(j, t_, kc_);
 
       kmlp_ = run_tmva(compo, t_);
-      std::cout << t_ << " " << kc_ << " " << kmlp_ << std::endl;
+      std::cout << t_ << " " << (kc_-kmlp_)/kc_*100 << std::endl;
     }
   }
 
