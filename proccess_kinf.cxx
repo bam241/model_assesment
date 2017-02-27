@@ -28,7 +28,7 @@ vector<pair<vector<int>, string> > read_nfo(string name) {
   ifstream mynfo(name);
   if(!mynfo)
     std::cout << "not able to open " << name << std::endl;
-  
+
   vector<pair<vector<int>, string> > v_name;
   do {
     int Z, A, I;
@@ -47,7 +47,7 @@ vector<pair<vector<int>, string> > read_nfo(string name) {
 
 void book_tmva_model(string weight_file) {
   std::cout << "in tmva" << std::endl;
-  
+
   string info_file = replace_extension(weight_file, "nfo");
   input_name = read_nfo(info_file);
   std::cout << "nfo readed" << std::endl;
@@ -56,7 +56,7 @@ void book_tmva_model(string weight_file) {
   for (int i = 0; i < (int)input_name.size(); i++) {
     input_var.push_back(0);
   }
-  
+
   for (int i = 0; i < (int)input_name.size(); i++) {
     reader->AddVariable(input_name[i].second, &input_var[i]);
   }
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
   //  my_data.pop_back();
 
   book_tmva_model(weight_file);
-  
+
   for (int i = 0; i < (int)my_data.size(); i++) {
     IsotopicVector compo = my_data[i].GetIsotopicVectorAt(0.);
     //compo.Print();
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     vector<double> kc;
     vector<double> kmlp;
     vector<float> mycompo = get_compo(compo);
-  
+
     for(int j=0; j < (int)mycompo.size(); j++){
       output << mycompo[i] << " ";
     }
