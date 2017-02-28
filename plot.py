@@ -34,10 +34,10 @@ def plot(df, filename,name_matrix):
             cmap = cm.get_cmap(name='brg', lut=None)
             im = ax_.tricontour(y, x, z, 600, cmap=cmap);
         elif n_row == n_col:
-            x = df[[name_matrix[n_row]]].values.squeeze()
-            y = df[[name_matrix[n_col]]].values.squeeze()
+            x = df[[name_matrix[n_row]]].values[0].squeeze()
+            y = df[[name_matrix[n_col]]].values[0].squeeze()
             left, right = np.nanmin(x), np.nanmax(x)
-            bottom, top = np.nanmin(x), np.nanmax(x)
+            bottom, top = np.nanmin(y), np.nanmax(y)
             width = right - left
             height = top - bottom
             p = patches.Rectangle(
