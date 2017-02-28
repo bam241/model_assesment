@@ -81,7 +81,7 @@ vector<float> get_compo(IsotopicVector iv){
   for (int i = 0; i < (int)input_name.size(); i++) {
     mycompo[i] = iv.GetQuantity(
         input_name[i].first[0], input_name[i].first[1], input_name[i].first[2]) / iv.GetActinidesComposition().GetSumOfAll();
-  //  std::cout << input_name[i].first[0] <<" "<< input_name[i].first[1] <<" "<<  input_name[i].first[2] << " " << input_var[i] << std::endl;
+   //std::cout << input_name[i].first[0] <<" "<< input_name[i].first[1] <<" "<<  input_name[i].first[2] << " " << input_var[i] << std::endl;
   }
   return mycompo;
 }
@@ -116,7 +116,6 @@ int main(int argc, char** argv) {
       std::cout << n <<"/1000 completed!\r" << std::flush;
   } while (!my_data_idx.eof());
   my_data_idx.close();
-  //  my_data.pop_back();
 
   book_tmva_model(weight_file);
 
@@ -131,10 +130,10 @@ int main(int argc, char** argv) {
     vector<float> mycompo = get_compo(compo);
 
     for(int j=0; j < (int)mycompo.size(); j++){
-      output << mycompo[i] << " ";
+      output << mycompo[j] << " ";
     }
 
-    for (int j = 0; j <= n_point; j++) {
+    for (int j = 0; j < n_point; j++) {
       double t_ = 0;
       double kc_ = 0;
       double kmlp_ = 0;
