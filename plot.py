@@ -28,16 +28,21 @@ def plot(df, filename,name_matrix):
         n_col = i % (len(name_matrix)-1)
         i = i+1
         if n_row < n_col:
-            x = df[[name_matrix[n_row]]].values.squeeze()
-            y = df[[name_matrix[n_col]]].values.squeeze()
-            z = df[[name_matrix[-1]]].values.squeeze()
+            df_ = df[[name_matrix[n_row],name_matrix[n_col],name_matrix[-1]]]
+            x = df_[[name_matrix[n_row]]].values.squeeze()
+            y = df_[[name_matrix[n_col]]].values.squeeze()
+            z = df_[[name_matrix[-1]]].values.squeeze()
             cmap = cm.get_cmap(name='brg', lut=None)
             im = ax_.tricontour(y, x, z, 600, cmap=cmap);
         elif n_row == n_col:
-            x = df[[name_matrix[n_row]]].values[0].squeeze()
-            y = df[[name_matrix[n_col]]].values[0].squeeze()
+            x = df[[name_matrix[n_row]]].values.squeeze()
+            y = df[[name_matrix[n_col]]].values.squeeze()
             left, right = np.nanmin(x), np.nanmax(x)
-            bottom, top = np.nanmin(y), np.nanmax(y)
+            bottom, top = np.nanmin(x), np.nanmax(x)
+            ax_.set_ylim(left,right);
+            ax_.set_xlim(bottom,top);
+            width = right - left
+            height = top - bottom
             width = right - left
             height = top - bottom
             p = patches.Rectangle(
