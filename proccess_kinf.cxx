@@ -151,6 +151,6 @@ int main(int argc, char** argv) {
 }
 
 /*
-g++ -o proccess_kinf proccess_kinf.cxx `root-config --cflags` `root-config
---libs`
+g++ -o proccess_kinf proccess_kinf.cxx -I /home/mouginot/work/app/CLASS/source/include -pthread -std=c++11 -Wno-deprecated-declarations -m64 -I/home/mouginot/work/app/root-6.06.02/bld/include -L /home/mouginot/work/app/CLASS/lib -L/home/mouginot/work/app/root-6.06.02/bld/lib -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -pthread -lm -ldl -rdynamic -lCLASSpkg -lTMVA -lHist -lMatrix
+
 */
