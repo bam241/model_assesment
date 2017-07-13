@@ -1,0 +1,14 @@
+./proccess_kinf ../../../DATA/500_control.list 10.xml
+./proccess_kinf ../../../DATA/500_control.list 100.xml
+./proccess_kinf ../../../DATA/500_control.list 1000.xml
+./proccess_kinf ../../../DATA/500_control.list 5000.xml
+./proccess_kinf ../../../DATA/500_control.list 10000.xml
+mv *.out 500
+
+mkdir 1000
+./proccess_kinf ../../../DATA/1500_control.list 10.xml
+./proccess_kinf ../../../DATA/1500_control.list 100.xml
+./proccess_kinf ../../../DATA/1500_control.list 1000.xml
+./proccess_kinf ../../../DATA/1500_control.list 5000.xml
+./proccess_kinf ../../../DATA/1500_control.list 10000.xml
+mv *.out 1000

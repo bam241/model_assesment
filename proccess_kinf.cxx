@@ -26,8 +26,7 @@ string replace_extension(string filename, string new_extension) {
 
 vector<pair<vector<int>, string> > read_nfo(string name) {
   ifstream mynfo(name);
-  if(!mynfo)
-    std::cout << "not able to open " << name << std::endl;
+  if (!mynfo) std::cout << "not able to open " << name << std::endl;
 
   vector<pair<vector<int>, string> > v_name;
   do {
@@ -39,9 +38,11 @@ vector<pair<vector<int>, string> > read_nfo(string name) {
     zai.push_back(A);
     zai.push_back(I);
     v_name.push_back(pair<vector<int>, string>(zai, name));
-    std::cout << Z << " " << A << " " << I << " " << name << std::endl;
+    //std::cout << "Z " << Z << " A " << A << " I " << I << " name " << name
+            //  << std::endl;
+            
   } while (!mynfo.eof());
-  v_name.pop_back(); //remove additional line
+  v_name.pop_back();  // remove additional line
   return v_name;
 }
 
@@ -67,21 +68,26 @@ void book_tmva_model(string weight_file) {
 
 void update_tmva_input(IsotopicVector iv, double t) {
   for (int i = 0; i < (int)input_name.size(); i++) {
-    input_var[i] = iv.GetQuantity(
-        input_name[i].first[0], input_name[i].first[1], input_name[i].first[2]) / iv.GetActinidesComposition().GetSumOfAll();
-  //  std::cout << input_name[i].first[0] <<" "<< input_name[i].first[1] <<" "<<  input_name[i].first[2] << " " << input_var[i] << std::endl;
+    input_var[i] =
+        iv.GetQuantity(input_name[i].first[0], input_name[i].first[1],
+                       input_name[i].first[2]) /
+        iv.GetActinidesComposition().GetSumOfAll();
+    //  std::cout << input_name[i].first[0] <<" "<< input_name[i].first[1] <<"
+    //  "<<  input_name[i].first[2] << " " << input_var[i] << std::endl;
   }
 
   input_time = t;
 }
 
-vector<float> get_compo(IsotopicVector iv){
+vector<float> get_compo(IsotopicVector iv) {
   vector<float> mycompo = input_var;
 
   for (int i = 0; i < (int)input_name.size(); i++) {
-    mycompo[i] = iv.GetQuantity(
-        input_name[i].first[0], input_name[i].first[1], input_name[i].first[2]) / iv.GetActinidesComposition().GetSumOfAll();
-   //std::cout << input_name[i].first[0] <<" "<< input_name[i].first[1] <<" "<<  input_name[i].first[2] << " " << input_var[i] << std::endl;
+    mycompo[i] = iv.GetQuantity(input_name[i].first[0], input_name[i].first[1],
+                                input_name[i].first[2]) /
+                 iv.GetActinidesComposition().GetSumOfAll();
+    // std::cout << input_name[i].first[0] <<" "<< input_name[i].first[1] <<"
+    // "<<  input_name[i].first[2] << " " << input_var[i] << std::endl;
   }
   return mycompo;
 }
@@ -100,6 +106,7 @@ int main(int argc, char** argv) {
     return 1;
   }
   string weight_file = argv[2];
+  cout << weight_file << endl;
   CLASSLogger* mylog = new CLASSLogger("mylog.log");
   ifstream my_data_idx(argv[1]);
   ofstream output(replace_extension(weight_file, "out"));
@@ -112,16 +119,29 @@ int main(int argc, char** argv) {
     my_data.push_back(EvolutionData(mylog, line));
     getline(my_data_idx, line);
     n++;
-    if( (n+1) %10 ==0)
-      std::cout << n <<"/1000 completed!\r" << std::flush;
+    if ((n + 1) % 10 == 0) std::cout << n << " completed!\r" << std::flush;
   } while (!my_data_idx.eof());
   my_data_idx.close();
 
   book_tmva_model(weight_file);
 
+  for (int j = 0; j < (int)input_name.size(); j++) {
+    output << input_name[j].second << " ";
+  }
+  {
+    TGraph* keff = my_data[0].GetKeff();
+    int n_point = keff->GetN();
+    for (int j = 0; j < n_point; j++) {
+      double t_ = 0;
+      double kc_ = 0;
+      keff->GetPoint(j, t_, kc_);
+      output << t_ * 34.22e-3 / 3600. / 24. << " ";
+    }
+    output << endl;
+  }
   for (int i = 0; i < (int)my_data.size(); i++) {
     IsotopicVector compo = my_data[i].GetIsotopicVectorAt(0.);
-    //compo.Print();
+    // compo.Print();
     TGraph* keff = my_data[i].GetKeff();
     int n_point = keff->GetN();
     vector<double> time;
@@ -129,7 +149,7 @@ int main(int argc, char** argv) {
     vector<double> kmlp;
     vector<float> mycompo = get_compo(compo);
 
-    for(int j=0; j < (int)mycompo.size(); j++){
+    for (int j = 0; j < (int)mycompo.size(); j++) {
       output << mycompo[j] << " ";
     }
 
@@ -142,7 +162,7 @@ int main(int argc, char** argv) {
       kmlp_ = run_tmva(compo, t_);
       output << " " << kc_ << " " << kmlp_ << " ";
     }
-    std::cout << i << std::endl;
+  //  std::cout << " i  " << i << std::endl;
     output << std::endl;
   }
   output.close();
@@ -151,6 +171,5 @@ int main(int argc, char** argv) {
 }
 
 /*
-g++ -o proccess_kinf proccess_kinf.cxx `root-config --cflags` `root-config
---libs`
+g++ -c proccess_kinf proccess_kinf.cxx `root-config --cflags` -I $CLASS_include
 */
