@@ -103,7 +103,6 @@ def plot(df, filename,name_matrix):
     f.colorbar(im, cax=cbar_ax)
     plt.savefig(filename, dpi=700)
 
-
 def main():
     name = sys.argv[1][:-4]
 
@@ -114,17 +113,15 @@ def main():
     data_k = data_matrix[:,range(16,len(data_matrix[0]))]
 
     # split k mure vs k mlp
-    data_k_mlp = data_k[:, ::2]
-    data_k_mure = data_k[:, 1::2]
-
+    data_k_mlp = data_k[:, 80]
+    data_k_mure = data_k[:, 81]
+    
     # compute diff in pcm
     data_diff_k_pcm = abs(data_k_mure - data_k_mlp)/data_k_mlp *100000
-    data_diff_k_pcm_sum = np.sum(data_diff_k_pcm, axis=1) / len(data_diff_k_pcm[0])
 
+    data_diff_k_pcm_with_index = np.column_stack((data_iv, np.asarray(data_diff_k_pcm)))
 
-    data_diff_k_pcm_sum_with_index = np.column_stack((data_iv, np.asarray(data_diff_k_pcm_sum)))
-
-    df = pd.DataFrame(data_diff_k_pcm_sum_with_index)
+    df = pd.DataFrame(data_diff_k_pcm_with_index)
     name_file = open(name+'.nfo', 'r')
     name_matrix = []
     for line in name_file:
@@ -145,7 +142,7 @@ def main():
     df.drop('246Cm', axis=1, inplace=True)
     name_matrix = np.delete(name_matrix,
             np.s_[1,2,3,6,7,8,9,10,11,12,13,14,15] )
-    filename = name +'.png'
+    filename = name +'_35GWdt.png'
     plot(df, filename,name_matrix)
 
 if __name__ == "__main__":
