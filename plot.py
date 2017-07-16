@@ -10,6 +10,8 @@ plt.rc('ytick', labelsize=1)
 plt.rcParams.update({'font.size': 5})
 import matplotlib.cm as cm
 import matplotlib.patches as patches
+from matplotlib import colors, ticker
+import random
 
 from pyDOE import lhs
 import numpy as np
@@ -38,6 +40,7 @@ def plot(df, filename,name_matrix):
     f, axn = plt.subplots(len(name_matrix)-1,len(name_matrix)-1, sharex='col',
             sharey='row')
     i = 0
+
     for ax_ in axn.flat:
         n_row = i // (len(name_matrix)-1)
         n_col = i % (len(name_matrix)-1)
@@ -57,9 +60,14 @@ def plot(df, filename,name_matrix):
             y = df_[[name_matrix[n_col]]].values.squeeze()
             z = df_[[name_matrix[-1]]].values.squeeze()
             cmap = cm.get_cmap(name='brg', lut=None)
-            im = ax_.tricontour(y, x, z, 1000, cmap=cmap);
-            x_ = []
-            y_ = []
+            im = ax_.tricontour(y, x, z, 2001, levels=np.linspace(0,2000,2001),
+                    cmap=cmap, vmin=10, vmax=2001, zorder=0);
+            max_yticks = 4
+            yloc = plt.MaxNLocator(max_yticks)
+            #ax_.yaxis.set_major_locator(yloc)
+            ax_.xaxis.set_major_locator(yloc)
+            ax_.grid(which = 'major', zorder=5, linestyle='-.', linewidth=.4)
+ 
             if filename == '1000/10.png':
                 if n_row == 0: y_ = u235
                 if n_row == 1: y_ = pu239
@@ -80,28 +88,34 @@ def plot(df, filename,name_matrix):
             height = top - bottom
             width = right - left
             height = top - bottom
-            p = patches.Rectangle(
-                (left, bottom), width, height,
-                fill=False, transform=ax_.transAxes, clip_on=False)
-            ax_.add_patch(p)
+            #p = patches.Rectangle(
+            #    (left, bottom), width, height,
+            #    fill=False, transform=ax_.transAxes, clip_on=False)
+            #ax_.add_patch(p)
             ax_.text(0.5*(left+right),
                     0.5*(bottom+top),
                     name_matrix[n_row],
                     horizontalalignment='center',
                     verticalalignment='center',
-                    fontsize=5,
+                    fontsize=15,
                     color='red')
+            max_yticks = 4
+            yloc = plt.MaxNLocator(max_yticks)
+            #ax_.yaxis.set_major_locator(yloc)
+            ax_.xaxis.set_major_locator(yloc)
 
         for item in ([ax_.title, ax_.xaxis.label, ax_.yaxis.label] +
                              ax_.get_xticklabels() + ax_.get_yticklabels()):
-                item.set_fontsize(3)
+                item.set_fontsize(8)
+    plt.locator_params(numticks=4)
     f.subplots_adjust(right=0.8)
     cbar_ax = f.add_axes([0.85, 0.15, 0.05, 0.7])
-    plt.tick_params(axis='both', which='major', labelsize=5)
-    plt.tick_params(axis='both', which='minor', labelsize=4)
-
-    f.colorbar(im, cax=cbar_ax)
-    plt.savefig(filename, dpi=700)
+    plt.tick_params(axis='both', which='major', labelsize=8)
+    #plt.tick_params(axis='both', which='minor', labelsize=4)
+    cbar = f.colorbar(im, ticks=[0,200,400, 600,800,1000,1200,1400,1600, 1800,2000],
+            cax=cbar_ax)
+    cbar.set_label(r'$\Delta k_{inf}$ [pcm]',size=8, rotation=90)
+    plt.savefig(filename, dpi=500)
 
 
 def main():
@@ -118,7 +132,7 @@ def main():
     data_k_mure = data_k[:, 1::2]
 
     # compute diff in pcm
-    data_diff_k_pcm = abs(data_k_mure - data_k_mlp)/data_k_mlp *100000
+    data_diff_k_pcm = abs(data_k_mure - data_k_mlp) *100000
     data_diff_k_pcm_sum = np.sum(data_diff_k_pcm, axis=1) / len(data_diff_k_pcm[0])
 
 
@@ -145,6 +159,10 @@ def main():
     df.drop('246Cm', axis=1, inplace=True)
     name_matrix = np.delete(name_matrix,
             np.s_[1,2,3,6,7,8,9,10,11,12,13,14,15] )
+    for index, row in df.iterrows():
+        if row['Delta']>1999:
+            row['Delta'] = 1970+30*random.random()
+    print(df)
     filename = name +'.png'
     plot(df, filename,name_matrix)
 

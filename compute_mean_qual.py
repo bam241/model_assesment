@@ -47,8 +47,8 @@ def main():
     data_k_mure = data_k[:, 1::2]
 
     # compute diff in pcm
-    data_diff_k_pcm = abs(data_k_mure - data_k_mlp)/data_k_mlp *100000
-    data_diff_k_pcm_sum = np.sum(data_diff_k_pcm, axis=1) / len(data_diff_k_pcm[0])
+    data_diff_k_pcm = abs(data_k_mure - data_k_mlp) *100000
+    data_diff_k_pcm_sum = np.std(data_diff_k_pcm, axis=1)
 
 
     print( sys.argv[1], " ", np.mean(data_diff_k_pcm_sum))
